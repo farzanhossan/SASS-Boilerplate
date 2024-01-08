@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - ~/apps/postgres:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=checklistbuilderpassword
+      - POSTGRES_USER=checklistbuilder
+    networks:
+      - local-net
+
+  adminer:
+    image: adminer:latest
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 4000:8080
+    networks:
+      - local-net
+
+  saas-boilerplate-api:
+    container_name: saas-boilerplate-api
+    image: saas-boilerplate-api
+    build: .
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 3000:3000
+    environment:
+      - NODE_ENV=staging
+    networks:
+      - local-net
+
+networks:
+  local-net:
+    driver: bridge
